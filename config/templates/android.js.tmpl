@@ -1,0 +1,74 @@
+/**
+ * @name DBinK 综合配置覆写 (Android端)
+ * @description
+ *   1. 剔除所有包含香港/HK关键词的节点及策略组引用；
+ *   2. 注入本地 TailSocks 节点并前置 Carrier-grade NAT 网段分流规则；
+ *   3. 前置自定义直连域名规则。
+ * @target Flclash / Clash Meta for Android
+ * @build {{BUILD_TAG}}
+ * @prerequisite 本地需开启 TailSocks 代理（默认 127.0.0.1:48115）
+ * @see https://clashparty.org/docs/guide/override/javascript
+ * @see https://github.com/mihomo-party-org/override-hub
+ */
+
+function main(config) {
+  // 1. 过滤所有香港节点
+  const hkPattern = /(港|hk|hongkong|hong kong)/i;
+
+  if (Array.isArray(config.proxies)) {
+    config.proxies = config.proxies.filter(
+      (proxy) => !hkPattern.test(proxy.name)
+    );
+  }
+
+  // 同步清理策略组中的香港节点，兜底 DIRECT
+  if (Array.isArray(config["proxy-groups"])) {
+    config["proxy-groups"].forEach((group) => {
+      if (Array.isArray(group.proxies)) {
+        group.proxies = group.proxies.filter(
+          (name) => !hkPattern.test(name)
+        );
+        if (group.proxies.length === 0) {
+          group.proxies.push("DIRECT");
+        }
+      }
+    });
+  }
+
+  // 2. 注入 TailSocks 节点
+  const proxyName = "TailSocks";
+
+  if (!Array.isArray(config.proxies)) config.proxies = [];
+  if (!Array.isArray(config.rules)) config.rules = [];
+
+  const proxy = {
+    name: proxyName,
+    type: "socks5",
+    server: "127.0.0.1",
+    port: 48115,
+  };
+
+  const oldProxyIndex = config.proxies.findIndex((p) => p.name === proxyName);
+  if (oldProxyIndex >= 0) {
+    config.proxies[oldProxyIndex] = proxy;
+  } else {
+    config.proxies.push(proxy);
+  }
+
+  // 3. 注入规则到最顶部（Tailscale 网段优先，直连域名紧随其后）
+  const tailscaleRules = [
+    "IP-CIDR,100.64.0.0/10,TailSocks,no-resolve",
+    "IP-CIDR6,fd7a:115c:a1e0::/48,TailSocks,no-resolve",
+  ];
+
+  const directRules = [
+{{DIRECT_RULES}}
+  ];
+
+  const topRules = [...tailscaleRules, ...directRules];
+
+  config.rules = config.rules.filter((rule) => !topRules.includes(rule));
+  config.rules.unshift(...topRules);
+
+  return config;
+}

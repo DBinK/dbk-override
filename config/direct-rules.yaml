@@ -1,0 +1,48 @@
+# 直连规则，格式与 Clash Party YAML 覆写一致（https://clashparty.org/docs/guide/override/yaml）
+# 该文件是 scripts/ 下三份覆写脚本的唯一规则来源。
+
++rules:
+  # 基础直连
+  - "DOMAIN-SUFFIX,ip.skk.moe,DIRECT"
+  - "DOMAIN-SUFFIX,js.design,DIRECT"
+  - "DOMAIN-SUFFIX,docs.blender.org,DIRECT"
+
+  # 常用网站
+  - "DOMAIN-SUFFIX,qq.com,DIRECT"
+  - "DOMAIN-SUFFIX,baidu.com,DIRECT"
+  - "DOMAIN-SUFFIX,tencent.com,DIRECT"
+  - "DOMAIN-SUFFIX,mi.com,DIRECT"
+  - "DOMAIN-SUFFIX,jd.com,DIRECT"
+  - "DOMAIN-SUFFIX,xiaohongshu.com,DIRECT"
+  - "DOMAIN-SUFFIX,taobao.com,DIRECT"
+  - "DOMAIN-SUFFIX,tmall.com,DIRECT"
+
+  # 公司官网
+  - "DOMAIN-SUFFIX,unitree.com,DIRECT"
+  - "DOMAIN-SUFFIX,agibot.com.cn,DIRECT"
+  - "DOMAIN-SUFFIX,deeprobotics.cn,DIRECT"
+  - "DOMAIN-SUFFIX,wuji.tech,DIRECT"
+
+  # 政务、财税与金融机构（避免异地 IP 风控）
+  - "DOMAIN-SUFFIX,gov.cn,DIRECT"
+  - "DOMAIN-SUFFIX,12306.cn,DIRECT"
+
+  # 国内协作办公 SaaS（防漏判代理与长连断线）
+  - "DOMAIN-SUFFIX,feishu.cn,DIRECT"
+  - "DOMAIN-SUFFIX,larksuite.com,DIRECT"
+  - "DOMAIN-SUFFIX,mastergo.com,DIRECT"
+  - "DOMAIN-SUFFIX,lanhuapp.com,DIRECT"
+  - "DOMAIN-SUFFIX,processon.com,DIRECT"
+
+  # 测速与推送直连通道（FCM / 测速）
+  - "DOMAIN-SUFFIX,mtalk.google.com,DIRECT"
+  - "DOMAIN-SUFFIX,alt1-mtalk.google.com,DIRECT"
+  - "DOMAIN-SUFFIX,alt2-mtalk.google.com,DIRECT"
+  - "DOMAIN-SUFFIX,speedtest.cn,DIRECT"
+
+  # 开源镜像站
+  - "DOMAIN-SUFFIX,tsinghua.edu.cn,DIRECT"
+  - "DOMAIN-SUFFIX,ustc.edu.cn,DIRECT"
+  - "DOMAIN-SUFFIX,bfsu.edu.cn,DIRECT"
+  - "DOMAIN-SUFFIX,zju.edu.cn,DIRECT"
+  - "DOMAIN-SUFFIX,mirrorz.org,DIRECT"

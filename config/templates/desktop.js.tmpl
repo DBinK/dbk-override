@@ -1,0 +1,47 @@
+/**
+ * @name DBinK 综合配置覆写 (桌面端)
+ * @description
+ *   1. 剔除所有包含香港/HK关键词的节点及策略组引用；
+ *   2. 前置自定义直连域名规则。
+ * @target Mihomo Party / Clash Verge Rev (Desktop)
+ * @build {{BUILD_TAG}}
+ * @see https://clashparty.org/docs/guide/override/javascript
+ * @see https://github.com/mihomo-party-org/override-hub
+ */
+
+function main(config) {
+  // 1. 过滤所有香港节点
+  const hkPattern = /(港|hk|hongkong|hong kong)/i;
+
+  if (Array.isArray(config.proxies)) {
+    config.proxies = config.proxies.filter(
+      (proxy) => !hkPattern.test(proxy.name)
+    );
+  }
+
+  // 同步清理策略组中的香港节点，兜底 DIRECT
+  if (Array.isArray(config["proxy-groups"])) {
+    config["proxy-groups"].forEach((group) => {
+      if (Array.isArray(group.proxies)) {
+        group.proxies = group.proxies.filter(
+          (name) => !hkPattern.test(name)
+        );
+        if (group.proxies.length === 0) {
+          group.proxies.push("DIRECT");
+        }
+      }
+    });
+  }
+
+  // 2. 注入直连规则到最顶部
+  if (!Array.isArray(config.rules)) config.rules = [];
+
+  const directRules = [
+{{DIRECT_RULES}}
+  ];
+
+  config.rules = config.rules.filter((rule) => !directRules.includes(rule));
+  config.rules.unshift(...directRules);
+
+  return config;
+}

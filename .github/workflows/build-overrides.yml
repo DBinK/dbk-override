@@ -1,0 +1,57 @@
+name: Build overrides
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'config/**'
+      - 'scripts/**'
+      - 'tools/**'
+      - '.github/workflows/build-overrides.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Resolve release tag
+        id: tag
+        run: echo "value=v$(date -u +%Y%m%d-%H%M)" >> "$GITHUB_OUTPUT"
+
+      - name: Generate override scripts
+        env:
+          BUILD_TAG: ${{ steps.tag.outputs.value }}
+        run: node tools/generate-overrides.js
+
+      - name: Verify generated scripts
+        env:
+          BUILD_TAG: ${{ steps.tag.outputs.value }}
+        run: |
+          for file in tmp/*.js; do node --check "$file"; done
+          node tools/generate-overrides.js --check
+
+      - name: Publish release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.value }}
+          name: ${{ steps.tag.outputs.value }}
+          body: |
+            由 `config/direct-rules.yaml`、`config/templates/` 与 `scripts/` 自动生成。
+            提交：${{ github.sha }}
+          make_latest: true
+          files: |
+            tmp/dbk-desktop.js
+            tmp/dbk-android.js
+            tmp/direct.js
+            tmp/hk.js
+            tmp/tailsock.js
+          fail_on_unmatched_files: true

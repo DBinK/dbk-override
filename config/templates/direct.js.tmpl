@@ -1,0 +1,22 @@
+/**
+ * @name 自定义直连域名
+ * @description 将指定常用网站及服务置顶直连
+ * @target Mihomo Party / Clash Verge Rev
+ * @build {{BUILD_TAG}}
+ * @see https://clashparty.org/docs/guide/override/javascript
+ * @see https://github.com/mihomo-party-org/override-hub
+ */
+
+function main(config) {
+  const directRules = [
+{{DIRECT_RULES}}
+  ];
+
+  if (!Array.isArray(config.rules)) {
+    config.rules = [];
+  }
+
+  config.rules = [...directRules, ...config.rules];
+
+  return config;
+}
