@@ -12,7 +12,7 @@ Mihomo / Clash 覆写脚本集合（适用于 Mihomo Party、Clash Verge Rev、F
 | [`dbk-android.js`](https://github.com/DBinK/dbk-override/releases/latest/download/dbk-android.js) | 综合覆写（过滤香港节点 + 注入 TailSocks 节点及路由 + 顶置直连域名） | Android 端（FlClash / CMFA） |
 | [`direct.js`](https://github.com/DBinK/dbk-override/releases/latest/download/direct.js) | 单独模块：自定义直连域名置顶 | 模块化按需引入 |
 | [`hk.js`](https://github.com/DBinK/dbk-override/releases/latest/download/hk.js) | 单独模块：过滤香港节点及清理策略组 | 模块化按需引入 |
-| [`tailsock.js`](https://github.com/DBinK/dbk-override/releases/latest/download/tailsock.js) | 单独模块：注入 TailSocks 节点并分流 100.64.0.0/10 网段 | 模块化按需引入 |
+| [`tailsock.js`](https://github.com/DBinK/dbk-override/releases/latest/download/tailsock.js) | 单独模块：注入 TailSocks 节点并分流 100.64.0.0/10 网段及 MagicDNS 域名 | 模块化按需引入 |
 
 固定地址始终指向最新版本：
 

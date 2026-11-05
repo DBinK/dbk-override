@@ -2,7 +2,7 @@
  * @name DBinK 综合配置覆写 (Android端)
  * @description
  *   1. 剔除所有包含香港/HK关键词的节点及策略组引用；
- *   2. 注入本地 TailSocks 节点并前置 Carrier-grade NAT 网段分流规则；
+ *   2. 注入本地 TailSocks 节点并前置 Carrier-grade NAT 网段及 MagicDNS 域名分流规则；
  *   3. 前置自定义直连域名规则。
  * @target Flclash / Clash Meta for Android
  * @build {{BUILD_TAG}}
@@ -55,8 +55,10 @@ function main(config) {
     config.proxies.push(proxy);
   }
 
-  // 3. 注入规则到最顶部（Tailscale 网段优先，直连域名紧随其后）
+  // 3. 注入规则到最顶部（Tailscale 域名与网段优先，直连域名紧随其后）
   const tailscaleRules = [
+    "DOMAIN-SUFFIX,ts.net,TailSocks",
+    "DOMAIN-SUFFIX,beta.tailscale.net,TailSocks",
     "IP-CIDR,100.64.0.0/10,TailSocks,no-resolve",
     "IP-CIDR6,fd7a:115c:a1e0::/48,TailSocks,no-resolve",
   ];
