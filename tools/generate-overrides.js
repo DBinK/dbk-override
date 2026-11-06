@@ -59,11 +59,11 @@ function stampBuildTag(content, buildTag) {
   if (BUILD_LINE_TEST_RE.test(content)) {
     return content.replace(BUILD_LINE_RE, ` * @build ${buildTag}`);
   }
-  const targetLine = /^( \* @target .*)$/m;
-  if (!targetLine.test(content)) {
-    throw new Error("脚本头部缺少 @target，无法写入 @build");
+  const anchorLine = /^( \* @(?:source|target) .*)$/m;
+  if (!anchorLine.test(content)) {
+    throw new Error("脚本头部缺少 @source 或 @target，无法写入 @build");
   }
-  return content.replace(targetLine, `$1\n * @build ${buildTag}`);
+  return content.replace(anchorLine, `$1\n * @build ${buildTag}`);
 }
 
 function normalizeBuildTag(content) {

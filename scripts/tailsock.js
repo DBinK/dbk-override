@@ -2,6 +2,7 @@
  * @name Tailscale 分流注入
  * @description 注入本地 TailSocks 节点并前置 Carrier-grade NAT 网段及 MagicDNS 域名分流规则
  * @target Mihomo Party / Clash Verge Rev
+ * @source https://github.com/DBinK/dbk-override
  * @prerequisite 本地需开启 TailSocks 代理（默认 127.0.0.1:48115）
  * @see https://clashparty.org/docs/guide/override/javascript
  * @see https://github.com/mihomo-party-org/override-hub

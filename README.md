@@ -51,7 +51,8 @@ node tools/generate-overrides.js --check  # 校验产物是否与源数据一致
 /**
  * @name 自定义直连域名
  * @target Mihomo Party / Clash Verge Rev
- * @build v20261023-1230
+ * @source https://github.com/DBinK/dbk-override
+ * @build v20261023-2030
  */
 ```
 

@@ -2,6 +2,7 @@
  * @name 过滤香港节点
  * @description 剔除节点列表及策略组中所有包含香港/HK关键词的节点
  * @target Mihomo Party / Clash Verge Rev
+ * @source https://github.com/DBinK/dbk-override
  * @see https://clashparty.org/docs/guide/override/javascript
  * @see https://github.com/mihomo-party-org/override-hub
  */
