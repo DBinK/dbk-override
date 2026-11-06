@@ -1,0 +1,56 @@
+/**
+ * @name 自定义强制代理
+ * @description 将指定常用网站及服务置顶强制代理，并自动适配配置中的代理策略组
+ * @target Mihomo Party / Clash Verge Rev / FlClash
+ * @build {{BUILD_TAG}}
+ * @see https://clashparty.org/docs/guide/override/javascript
+ * @see https://github.com/mihomo-party-org/override-hub
+ */
+
+function resolveProxyGroup(config) {
+  const groups = Array.isArray(config["proxy-groups"]) ? config["proxy-groups"] : [];
+  if (groups.length === 0) return "PROXY";
+
+  const candidates = ["PROXY", "节点选择", "PROXIES", "选择节点", "Auto", "自动选择"];
+  for (const name of candidates) {
+    if (groups.some((g) => g && g.name === name)) {
+      return name;
+    }
+  }
+
+  // 回退：找到第一个非特殊保留组（排除 DIRECT、REJECT、GLOBAL 等）
+  const fallback = groups.find((g) => {
+    if (!g || !g.name) return false;
+    const n = g.name.toUpperCase();
+    return n !== "DIRECT" && n !== "REJECT" && n !== "GLOBAL";
+  });
+
+  return fallback ? fallback.name : "PROXY";
+}
+
+function main(config) {
+  const targetGroup = resolveProxyGroup(config);
+
+  const rawRules = [
+{{PROXY_RULES}}
+  ];
+
+  // 动态替换占位符 PROXY 为实际探测到的策略组名称
+  const proxyRules = rawRules.map((rule) => {
+    const parts = rule.split(",");
+    if (parts.length >= 3 && parts[2].trim() === "PROXY") {
+      parts[2] = targetGroup;
+      return parts.join(",");
+    }
+    return rule;
+  });
+
+  if (!Array.isArray(config.rules)) {
+    config.rules = [];
+  }
+
+  config.rules = config.rules.filter((rule) => !proxyRules.includes(rule));
+  config.rules.unshift(...proxyRules);
+
+  return config;
+}

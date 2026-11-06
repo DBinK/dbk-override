@@ -1,0 +1,25 @@
+# 强制代理规则，格式与 Clash Party YAML 覆写一致（https://clashparty.org/docs/guide/override/yaml）
+# 该文件是生成 proxy.js 及综合覆写脚本的代理规则来源。
+# 规则中的 PROXY 会在运行时自动映射到订阅配置中的实际代理策略组（如 节点选择、PROXY 等）。
+
++rules:
+  # AI 平台与工具
+  - "DOMAIN-SUFFIX,openai.com,PROXY"
+  - "DOMAIN-SUFFIX,chatgpt.com,PROXY"
+  - "DOMAIN-SUFFIX,oaistatic.com,PROXY"
+  - "DOMAIN-SUFFIX,oaiusercontent.com,PROXY"
+  - "DOMAIN-SUFFIX,anthropic.com,PROXY"
+  - "DOMAIN-SUFFIX,claude.ai,PROXY"
+  - "DOMAIN-SUFFIX,cursor.com,PROXY"
+  - "DOMAIN-SUFFIX,cursor.sh,PROXY"
+  - "DOMAIN-SUFFIX,v0.dev,PROXY"
+  - "DOMAIN-SUFFIX,groq.com,PROXY"
+
+  # GitHub 生态（含 Release 存储桶、Raw、Assets、Web）
+  - "DOMAIN-KEYWORD,github,PROXY"
+  - "DOMAIN-SUFFIX,ghcr.io,PROXY"
+
+  # 海外技术服务与开发工具
+  - "DOMAIN-SUFFIX,docker.com,PROXY"
+  - "DOMAIN-SUFFIX,docker.io,PROXY"
+  - "DOMAIN-SUFFIX,huggingface.co,PROXY"

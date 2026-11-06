@@ -8,9 +8,10 @@ Mihomo / Clash 覆写脚本集合（适用于 Mihomo Party、Clash Verge Rev、F
 
 | 资源 | 说明 | 适用场景 |
 | --- | --- | --- |
-| [`dbk-desktop.js`](https://github.com/DBinK/dbk-override/releases/latest/download/dbk-desktop.js) | 综合覆写（过滤香港节点 + 顶置直连域名） | 桌面端（Mihomo Party / Clash Verge Rev） |
-| [`dbk-android.js`](https://github.com/DBinK/dbk-override/releases/latest/download/dbk-android.js) | 综合覆写（过滤香港节点 + 注入 TailSocks 节点及路由 + 顶置直连域名） | Android 端（FlClash / CMFA） |
+| [`dbk-desktop.js`](https://github.com/DBinK/dbk-override/releases/latest/download/dbk-desktop.js) | 综合覆写（过滤香港节点 + 顶置直连域名与强制代理） | 桌面端（Mihomo Party / Clash Verge Rev） |
+| [`dbk-android.js`](https://github.com/DBinK/dbk-override/releases/latest/download/dbk-android.js) | 综合覆写（过滤香港节点 + 注入 TailSocks 节点及路由 + 顶置直连域名与强制代理） | Android 端（FlClash / CMFA） |
 | [`direct.js`](https://github.com/DBinK/dbk-override/releases/latest/download/direct.js) | 单独模块：自定义直连域名置顶 | 模块化按需引入 |
+| [`proxy.js`](https://github.com/DBinK/dbk-override/releases/latest/download/proxy.js) | 单独模块：自定义强制代理置顶（自动适配配置代理组） | 模块化按需引入 |
 | [`hk.js`](https://github.com/DBinK/dbk-override/releases/latest/download/hk.js) | 单独模块：过滤香港节点及清理策略组 | 模块化按需引入 |
 | [`tailsock.js`](https://github.com/DBinK/dbk-override/releases/latest/download/tailsock.js) | 单独模块：注入 TailSocks 节点并分流 100.64.0.0/10 网段及 MagicDNS 域名 | 模块化按需引入 |
 
@@ -20,6 +21,7 @@ Mihomo / Clash 覆写脚本集合（适用于 Mihomo Party、Clash Verge Rev、F
 https://github.com/DBinK/dbk-override/releases/latest/download/dbk-desktop.js
 https://github.com/DBinK/dbk-override/releases/latest/download/dbk-android.js
 https://github.com/DBinK/dbk-override/releases/latest/download/direct.js
+https://github.com/DBinK/dbk-override/releases/latest/download/proxy.js
 https://github.com/DBinK/dbk-override/releases/latest/download/hk.js
 https://github.com/DBinK/dbk-override/releases/latest/download/tailsock.js
 ```
@@ -28,11 +30,12 @@ https://github.com/DBinK/dbk-override/releases/latest/download/tailsock.js
 
 ## 本地生成
 
-直连规则统一维护在 `config/direct-rules.yaml`，使用 [Clash Party YAML 覆写格式](https://clashparty.org/docs/guide/override/yaml)：
+直连规则统一维护在 `config/direct-rules.yaml`，强制代理规则维护在 `config/proxy-rules.yaml`，均使用 [Clash Party YAML 覆写格式](https://clashparty.org/docs/guide/override/yaml)：
 
 ```yaml
 +rules:
   - "DOMAIN-SUFFIX,example.com,DIRECT"
+  - "DOMAIN-SUFFIX,openai.com,PROXY"
 ```
 
 平台差异放在 `config/templates/`，`scripts/` 下的独立模块会原样复制。生成结果写入 `tmp/`（已被 git 忽略）：

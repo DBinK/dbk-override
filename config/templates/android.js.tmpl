@@ -3,13 +3,33 @@
  * @description
  *   1. 剔除所有包含香港/HK关键词的节点及策略组引用；
  *   2. 注入本地 TailSocks 节点并前置 Carrier-grade NAT 网段及 MagicDNS 域名分流规则；
- *   3. 前置自定义直连域名规则。
+ *   3. 前置自定义直连与强制代理规则（自动适配代理策略组）。
  * @target Flclash / Clash Meta for Android
  * @build {{BUILD_TAG}}
  * @prerequisite 本地需开启 TailSocks 代理（默认 127.0.0.1:48115）
  * @see https://clashparty.org/docs/guide/override/javascript
  * @see https://github.com/mihomo-party-org/override-hub
  */
+
+function resolveProxyGroup(config) {
+  const groups = Array.isArray(config["proxy-groups"]) ? config["proxy-groups"] : [];
+  if (groups.length === 0) return "PROXY";
+
+  const candidates = ["PROXY", "节点选择", "PROXIES", "选择节点", "Auto", "自动选择"];
+  for (const name of candidates) {
+    if (groups.some((g) => g && g.name === name)) {
+      return name;
+    }
+  }
+
+  const fallback = groups.find((g) => {
+    if (!g || !g.name) return false;
+    const n = g.name.toUpperCase();
+    return n !== "DIRECT" && n !== "REJECT" && n !== "GLOBAL";
+  });
+
+  return fallback ? fallback.name : "PROXY";
+}
 
 function main(config) {
   // 1. 过滤所有香港节点
@@ -55,7 +75,8 @@ function main(config) {
     config.proxies.push(proxy);
   }
 
-  // 3. 注入规则到最顶部（Tailscale 域名与网段优先，直连域名紧随其后）
+  // 3. 注入规则到最顶部
+  // 优先级：TailSocks 节点路由 -> 强制直连 (DIRECT) -> 强制代理 (PROXY 目标策略组) -> 订阅原规则
   const tailscaleRules = [
     "DOMAIN-SUFFIX,ts.net,TailSocks",
     "DOMAIN-SUFFIX,beta.tailscale.net,TailSocks",
@@ -63,11 +84,26 @@ function main(config) {
     "IP-CIDR6,fd7a:115c:a1e0::/48,TailSocks,no-resolve",
   ];
 
+  const targetGroup = resolveProxyGroup(config);
+
+  const rawProxyRules = [
+{{PROXY_RULES}}
+  ];
+
+  const proxyRules = rawProxyRules.map((rule) => {
+    const parts = rule.split(",");
+    if (parts.length >= 3 && parts[2].trim() === "PROXY") {
+      parts[2] = targetGroup;
+      return parts.join(",");
+    }
+    return rule;
+  });
+
   const directRules = [
 {{DIRECT_RULES}}
   ];
 
-  const topRules = [...tailscaleRules, ...directRules];
+  const topRules = [...tailscaleRules, ...directRules, ...proxyRules];
 
   config.rules = config.rules.filter((rule) => !topRules.includes(rule));
   config.rules.unshift(...topRules);

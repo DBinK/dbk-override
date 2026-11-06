@@ -7,6 +7,9 @@
   - "DOMAIN-SUFFIX,js.design,DIRECT"
   - "DOMAIN-SUFFIX,docs.blender.org,DIRECT"
 
+  # 国内 AI 服务
+  - "DOMAIN-SUFFIX,deepseek.com,DIRECT"
+
   # 常用网站
   - "DOMAIN-SUFFIX,qq.com,DIRECT"
   - "DOMAIN-SUFFIX,baidu.com,DIRECT"

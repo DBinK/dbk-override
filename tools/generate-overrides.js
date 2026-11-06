@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * 从 config/direct-rules.yaml 生成覆写脚本到 tmp/（本地测试用，已被 git 忽略），
+ * 从 config/direct-rules.yaml 与 config/proxy-rules.yaml 生成覆写脚本到 tmp/（本地测试用，已被 git 忽略），
  * 并把 scripts/ 下的独立模块原样复制过去。
  *
  * 规则文件使用 Clash Party 的 YAML 覆写格式：
@@ -15,7 +15,8 @@ const fs = require("fs");
 const path = require("path");
 
 const ROOT = path.resolve(__dirname, "..");
-const RULES_FILE = path.join(ROOT, "config", "direct-rules.yaml");
+const DIRECT_RULES_FILE = path.join(ROOT, "config", "direct-rules.yaml");
+const PROXY_RULES_FILE = path.join(ROOT, "config", "proxy-rules.yaml");
 const TEMPLATE_DIR = path.join(ROOT, "config", "templates");
 const SOURCE_DIR = path.join(ROOT, "scripts");
 const OUTPUT_DIR = path.join(ROOT, "tmp");
@@ -24,6 +25,7 @@ const TARGETS = [
   { template: "desktop.js.tmpl", output: "dbk-desktop.js" },
   { template: "android.js.tmpl", output: "dbk-android.js" },
   { template: "direct.js.tmpl", output: "direct.js" },
+  { template: "proxy.js.tmpl", output: "proxy.js" },
 ];
 
 // 原样复制到输出目录的独立模块（不参与模板渲染）
@@ -57,8 +59,9 @@ function normalizeBuildTag(content) {
   return content.replace(BUILD_LINE_RE, " * @build <tag>");
 }
 
-function loadRules() {
-  const lines = fs.readFileSync(RULES_FILE, "utf8").split(/\r?\n/);
+function loadRules(filePath) {
+  const fileName = path.basename(filePath);
+  const lines = fs.readFileSync(filePath, "utf8").split(/\r?\n/);
   const entries = [];
   let inRules = false;
 
@@ -72,7 +75,7 @@ function loadRules() {
         continue;
       }
       if (trimmed.startsWith("#")) continue;
-      throw new Error(`direct-rules.yaml: 预期顶层的 +rules:，实际为「${trimmed}」`);
+      throw new Error(`${fileName}: 预期顶层的 +rules:，实际为「${trimmed}」`);
     }
 
     const comment = trimmed.match(COMMENT_RE);
@@ -83,14 +86,14 @@ function loadRules() {
 
     const rule = trimmed.match(RULE_RE);
     if (!rule) {
-      throw new Error(`direct-rules.yaml: 无法解析的规则行「${trimmed}」`);
+      throw new Error(`${fileName}: 无法解析的规则行「${trimmed}」`);
     }
     entries.push({ kind: "rule", text: rule[1] });
   }
 
-  if (!inRules) throw new Error("direct-rules.yaml: 缺少 +rules:");
+  if (!inRules) throw new Error(`${fileName}: 缺少 +rules:`);
   if (!entries.some((entry) => entry.kind === "rule")) {
-    throw new Error("direct-rules.yaml: +rules 下没有规则");
+    throw new Error(`${fileName}: +rules 下没有规则`);
   }
 
   const seen = new Set();
@@ -98,14 +101,14 @@ function loadRules() {
     if (entry.kind !== "rule") continue;
     const parts = entry.text.split(",");
     if (parts.length !== 3) {
-      throw new Error(`direct-rules.yaml: 规则应为「类型,域名,策略」，实际为「${entry.text}」`);
+      throw new Error(`${fileName}: 规则应为「类型,域名/IP,策略」，实际为「${entry.text}」`);
     }
     if (!parts[0].trim() || !parts[1].trim() || !parts[2].trim()) {
-      throw new Error(`direct-rules.yaml: 规则存在空字段「${entry.text}」`);
+      throw new Error(`${fileName}: 规则存在空字段「${entry.text}」`);
     }
     const key = entry.text.replace(/\s+/g, "").toLowerCase();
     if (seen.has(key)) {
-      throw new Error(`direct-rules.yaml: 规则重复「${entry.text}」`);
+      throw new Error(`${fileName}: 规则重复「${entry.text}」`);
     }
     seen.add(key);
   }
@@ -126,21 +129,26 @@ function renderRuleBlock(entries) {
   return lines.join("\n");
 }
 
-function render(template, ruleBlock, buildTag) {
-  if (!template.includes("{{DIRECT_RULES}}")) {
-    throw new Error("模板缺少 {{DIRECT_RULES}} 占位符");
-  }
+function render(template, { directRules, proxyRules }, buildTag) {
   if (!template.includes("{{BUILD_TAG}}")) {
     throw new Error("模板缺少 {{BUILD_TAG}} 占位符");
   }
-  return template
-    .replace("{{DIRECT_RULES}}", ruleBlock)
-    .replace("{{BUILD_TAG}}", buildTag);
+
+  let result = template.replace("{{BUILD_TAG}}", buildTag);
+  if (result.includes("{{DIRECT_RULES}}")) {
+    result = result.replace("{{DIRECT_RULES}}", directRules);
+  }
+  if (result.includes("{{PROXY_RULES}}")) {
+    result = result.replace("{{PROXY_RULES}}", proxyRules);
+  }
+
+  return result;
 }
 
 function main() {
   const checkOnly = process.argv.includes("--check");
-  const ruleBlock = renderRuleBlock(loadRules());
+  const directRuleBlock = renderRuleBlock(loadRules(DIRECT_RULES_FILE));
+  const proxyRuleBlock = renderRuleBlock(loadRules(PROXY_RULES_FILE));
   const buildTag = resolveBuildTag();
   let drift = false;
 
@@ -149,14 +157,18 @@ function main() {
   for (const target of TARGETS) {
     const templatePath = path.join(TEMPLATE_DIR, target.template);
     const outputPath = path.join(OUTPUT_DIR, target.output);
-    const expected = render(fs.readFileSync(templatePath, "utf8"), ruleBlock, buildTag);
+    const expected = render(
+      fs.readFileSync(templatePath, "utf8"),
+      { directRules: directRuleBlock, proxyRules: proxyRuleBlock },
+      buildTag
+    );
 
     if (checkOnly) {
       const actual = fs.existsSync(outputPath)
         ? fs.readFileSync(outputPath, "utf8")
         : null;
       if (actual === null || normalizeBuildTag(actual) !== normalizeBuildTag(expected)) {
-        console.error(`${target.output}: 与 direct-rules.yaml 不一致，请运行 node tools/generate-overrides.js`);
+        console.error(`${target.output}: 与规则/模板不一致，请运行 node tools/generate-overrides.js`);
         drift = true;
       } else {
         console.log(`${target.output}: 一致`);

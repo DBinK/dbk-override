@@ -52,6 +52,7 @@ jobs:
             tmp/dbk-desktop.js
             tmp/dbk-android.js
             tmp/direct.js
+            tmp/proxy.js
             tmp/hk.js
             tmp/tailsock.js
           fail_on_unmatched_files: true
