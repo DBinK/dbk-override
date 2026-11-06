@@ -4,7 +4,7 @@ Mihomo / Clash 覆写脚本集合（适用于 Mihomo Party、Clash Verge Rev、F
 
 ## 下载
 
-当 `config/`、`scripts/`、`tools/` 或 workflow 变更并推送到 `main` 时，自动生成并发布 Release，tag 形如 `v20261023-1229`（UTC 日期 + 时分），同时标记为 latest：
+当 `config/`、`scripts/`、`tools/` 或 workflow 变更并推送到 `main` 时，自动生成并发布 Release，tag 形如 `v20261023-2029`（北京时间 UTC+8 日期 + 时分），同时标记为 latest：
 
 | 资源 | 说明 | 适用场景 |
 | --- | --- | --- |
@@ -55,7 +55,7 @@ node tools/generate-overrides.js --check  # 校验产物是否与源数据一致
  */
 ```
 
-本地不传 `BUILD_TAG` 时按当前 UTC 时间生成；CI 中由 workflow 传入同一个 tag。`--check` 忽略 `@build` 的具体值，只比较其余内容。
+本地不传 `BUILD_TAG` 时按当前北京时间生成；CI 中由 workflow 传入同一个 tag。`--check` 忽略 `@build` 的具体值，只比较其余内容。
 
 ## 参考文档
 

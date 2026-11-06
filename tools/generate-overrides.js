@@ -40,8 +40,19 @@ function resolveBuildTag() {
   const fromEnv = (process.env.BUILD_TAG || "").trim();
   if (fromEnv) return fromEnv;
   const now = new Date();
-  const pad = (n) => String(n).padStart(2, "0");
-  return `v${now.getUTCFullYear()}${pad(now.getUTCMonth() + 1)}${pad(now.getUTCDate())}-${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}`;
+  const formatter = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Shanghai",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  const parts = Object.fromEntries(
+    formatter.formatToParts(now).map((p) => [p.type, p.value])
+  );
+  return `v${parts.year}${parts.month}${parts.day}-${parts.hour}${parts.minute}`;
 }
 
 function stampBuildTag(content, buildTag) {
