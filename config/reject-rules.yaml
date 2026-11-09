@@ -2,11 +2,18 @@
 # 该文件是生成 reject.js 及综合覆写脚本的拦截规则来源。
 
 +rules:
-  # 进程拦截
+  # 进程拦截：系统预置运营商静默遥测与自注册组件
+  # - com.mobiletools.systemhelper：预置系统助手，静默搜集 IMEI/基站及 24h 应用使用时长并定时回传
+  # - com.coloros.regservice / com.oppo.regservice：OPPO/一加等机型运营商终端管理 (DM) 自动入网注册服务
   - "PROCESS-NAME,com.mobiletools.systemhelper,REJECT"
+  - "PROCESS-NAME,com.coloros.regservice,REJECT"
+  - "PROCESS-NAME,com.oppo.regservice,REJECT"
 
-  # 域名拦截
+  # 域名拦截：运营商终端管理 (DM) 与设备适配上报专用网关
+  # - dm.wo.com.cn：中国联通终端管理与应用使用统计上报接口 (dm.wo.com.cn:18080/register)
+  # - fxltsbl.com：中国移动终端自注册与适配管理平台 (含 a.fxltsbl.com、shipei.fxltsbl.com)
   - "DOMAIN,dm.wo.com.cn,REJECT"
+  - "DOMAIN-SUFFIX,fxltsbl.com,REJECT"
 
-  # 遥测拦截（PostHog 数据接入端点，不影响 posthog.com 官网及控制台）
+  # 遥测拦截：PostHog 数据接入端点（收敛在 *.i.posthog.com，不影响 posthog.com 官网及控制台访问）
   - "DOMAIN-SUFFIX,i.posthog.com,REJECT"
