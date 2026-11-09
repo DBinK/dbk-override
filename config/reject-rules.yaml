@@ -7,3 +7,6 @@
 
   # 域名拦截
   - "DOMAIN,dm.wo.com.cn,REJECT"
+
+  # 遥测拦截（PostHog 数据接入端点，不影响 posthog.com 官网及控制台）
+  - "DOMAIN-SUFFIX,i.posthog.com,REJECT"
