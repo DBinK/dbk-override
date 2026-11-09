@@ -1,0 +1,9 @@
+# 拦截规则，格式与 Clash Party YAML 覆写一致（https://clashparty.org/docs/guide/override/yaml）
+# 该文件是生成 reject.js 及综合覆写脚本的拦截规则来源。
+
++rules:
+  # 进程拦截
+  - "PROCESS-NAME,com.mobiletools.systemhelper,REJECT"
+
+  # 域名拦截
+  - "DOMAIN,dm.wo.com.cn,REJECT"

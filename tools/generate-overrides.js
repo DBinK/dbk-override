@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * 从 config/direct-rules.yaml 与 config/proxy-rules.yaml 生成覆写脚本到 tmp/（本地测试用，已被 git 忽略），
+ * 从 config/ 下的规则文件生成覆写脚本到 tmp/（本地测试用，已被 git 忽略），
  * 并把 scripts/ 下的独立模块原样复制过去。
  *
  * 规则文件使用 Clash Party 的 YAML 覆写格式：
@@ -15,6 +15,7 @@ const fs = require("fs");
 const path = require("path");
 
 const ROOT = path.resolve(__dirname, "..");
+const REJECT_RULES_FILE = path.join(ROOT, "config", "reject-rules.yaml");
 const DIRECT_RULES_FILE = path.join(ROOT, "config", "direct-rules.yaml");
 const PROXY_RULES_FILE = path.join(ROOT, "config", "proxy-rules.yaml");
 const TEMPLATE_DIR = path.join(ROOT, "config", "templates");
@@ -24,6 +25,7 @@ const OUTPUT_DIR = path.join(ROOT, "tmp");
 const TARGETS = [
   { template: "desktop.js.tmpl", output: "dbk-desktop.js" },
   { template: "android.js.tmpl", output: "dbk-android.js" },
+  { template: "reject.js.tmpl", output: "reject.js" },
   { template: "direct.js.tmpl", output: "direct.js" },
   { template: "proxy.js.tmpl", output: "proxy.js" },
 ];
@@ -140,12 +142,15 @@ function renderRuleBlock(entries) {
   return lines.join("\n");
 }
 
-function render(template, { directRules, proxyRules }, buildTag) {
+function render(template, { rejectRules, directRules, proxyRules }, buildTag) {
   if (!template.includes("{{BUILD_TAG}}")) {
     throw new Error("模板缺少 {{BUILD_TAG}} 占位符");
   }
 
   let result = template.replace("{{BUILD_TAG}}", buildTag);
+  if (result.includes("{{REJECT_RULES}}")) {
+    result = result.replace("{{REJECT_RULES}}", rejectRules);
+  }
   if (result.includes("{{DIRECT_RULES}}")) {
     result = result.replace("{{DIRECT_RULES}}", directRules);
   }
@@ -158,6 +163,7 @@ function render(template, { directRules, proxyRules }, buildTag) {
 
 function main() {
   const checkOnly = process.argv.includes("--check");
+  const rejectRuleBlock = renderRuleBlock(loadRules(REJECT_RULES_FILE));
   const directRuleBlock = renderRuleBlock(loadRules(DIRECT_RULES_FILE));
   const proxyRuleBlock = renderRuleBlock(loadRules(PROXY_RULES_FILE));
   const buildTag = resolveBuildTag();
@@ -170,7 +176,11 @@ function main() {
     const outputPath = path.join(OUTPUT_DIR, target.output);
     const expected = render(
       fs.readFileSync(templatePath, "utf8"),
-      { directRules: directRuleBlock, proxyRules: proxyRuleBlock },
+      {
+        rejectRules: rejectRuleBlock,
+        directRules: directRuleBlock,
+        proxyRules: proxyRuleBlock,
+      },
       buildTag
     );
 

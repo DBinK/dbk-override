@@ -2,7 +2,7 @@
  * @name DBinK 综合配置覆写 (桌面端)
  * @description
  *   1. 剔除所有包含香港/HK关键词的节点及策略组引用；
- *   2. 前置自定义直连与强制代理规则（自动适配代理策略组）。
+ *   2. 前置自定义拦截 (REJECT)、直连 (DIRECT) 与强制代理 (PROXY) 规则。
  * @target Mihomo Party / Clash Verge Rev (Desktop)
  * @source https://github.com/DBinK/dbk-override
  * @build {{BUILD_TAG}}
@@ -54,9 +54,13 @@ function main(config) {
     });
   }
 
-  // 2. 注入直连与强制代理规则到顶部
-  // 优先级：强制直连 (DIRECT) -> 强制代理 (PROXY 目标策略组) -> 订阅原规则
+  // 2. 注入拦截、直连与强制代理规则到顶部
+  // 优先级：强制拦截 (REJECT) -> 强制直连 (DIRECT) -> 强制代理 (PROXY 目标策略组) -> 订阅原规则
   const targetGroup = resolveProxyGroup(config);
+
+  const rejectRules = [
+{{REJECT_RULES}}
+  ];
 
   const rawProxyRules = [
 {{PROXY_RULES}}
@@ -75,7 +79,7 @@ function main(config) {
 {{DIRECT_RULES}}
   ];
 
-  const topRules = [...directRules, ...proxyRules];
+  const topRules = [...rejectRules, ...directRules, ...proxyRules];
 
   if (!Array.isArray(config.rules)) config.rules = [];
 

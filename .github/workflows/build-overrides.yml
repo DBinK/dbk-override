@@ -45,12 +45,13 @@ jobs:
           tag_name: ${{ steps.tag.outputs.value }}
           name: ${{ steps.tag.outputs.value }}
           body: |
-            由 `config/direct-rules.yaml`、`config/templates/` 与 `scripts/` 自动生成。
+            由 `config/` 规则文件、`config/templates/` 与 `scripts/` 自动生成。
             提交：${{ github.sha }}
           make_latest: true
           files: |
             tmp/dbk-desktop.js
             tmp/dbk-android.js
+            tmp/reject.js
             tmp/direct.js
             tmp/proxy.js
             tmp/hk.js

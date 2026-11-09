@@ -3,7 +3,7 @@
  * @description
  *   1. 剔除所有包含香港/HK关键词的节点及策略组引用；
  *   2. 注入本地 TailSocks 节点并前置 Carrier-grade NAT 网段及 MagicDNS 域名分流规则；
- *   3. 前置自定义直连与强制代理规则（自动适配代理策略组）。
+ *   3. 前置自定义拦截 (REJECT)、直连 (DIRECT) 与强制代理 (PROXY) 规则。
  * @target Flclash / Clash Meta for Android
  * @source https://github.com/DBinK/dbk-override
  * @build {{BUILD_TAG}}
@@ -77,7 +77,7 @@ function main(config) {
   }
 
   // 3. 注入规则到最顶部
-  // 优先级：TailSocks 节点路由 -> 强制直连 (DIRECT) -> 强制代理 (PROXY 目标策略组) -> 订阅原规则
+  // 优先级：TailSocks 节点路由 -> 强制拦截 (REJECT) -> 强制直连 (DIRECT) -> 强制代理 (PROXY 目标策略组) -> 订阅原规则
   const tailscaleRules = [
     "DOMAIN-SUFFIX,ts.net,TailSocks",
     "DOMAIN-SUFFIX,beta.tailscale.net,TailSocks",
@@ -86,6 +86,10 @@ function main(config) {
   ];
 
   const targetGroup = resolveProxyGroup(config);
+
+  const rejectRules = [
+{{REJECT_RULES}}
+  ];
 
   const rawProxyRules = [
 {{PROXY_RULES}}
@@ -104,7 +108,7 @@ function main(config) {
 {{DIRECT_RULES}}
   ];
 
-  const topRules = [...tailscaleRules, ...directRules, ...proxyRules];
+  const topRules = [...tailscaleRules, ...rejectRules, ...directRules, ...proxyRules];
 
   config.rules = config.rules.filter((rule) => !topRules.includes(rule));
   config.rules.unshift(...topRules);

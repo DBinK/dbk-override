@@ -1,0 +1,25 @@
+/**
+ * @name 自定义拦截规则
+ * @description 将指定流氓进程、追踪及广告域名置顶拦截 (REJECT)
+ * @target Mihomo Party / Clash Verge Rev / FlClash
+ * @source https://github.com/DBinK/dbk-override
+ * @build {{BUILD_TAG}}
+ * @see https://clashparty.org/docs/guide/override/javascript
+ * @see https://github.com/mihomo-party-org/override-hub
+ */
+
+function main(config) {
+  const rejectRules = [
+{{REJECT_RULES}}
+  ];
+
+  if (!Array.isArray(config.rules)) {
+    config.rules = [];
+  }
+
+  // 避免重复并置顶
+  config.rules = config.rules.filter((rule) => !rejectRules.includes(rule));
+  config.rules.unshift(...rejectRules);
+
+  return config;
+}
