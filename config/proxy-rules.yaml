@@ -15,6 +15,17 @@
   - "DOMAIN-SUFFIX,v0.dev,PROXY"
   - "DOMAIN-SUFFIX,groq.com,PROXY"
 
+  # Devin / Cognition 生态（含 API、Web、CLI、MCP、DeepWiki 与 Devin Desktop）
+  - "DOMAIN-SUFFIX,devin.ai,PROXY"
+  - "DOMAIN-SUFFIX,devinapps.com,PROXY"
+  - "DOMAIN-SUFFIX,devinenterprise.com,PROXY"
+  - "DOMAIN-SUFFIX,cognition.ai,PROXY"
+  - "DOMAIN-SUFFIX,cognition.com,PROXY"
+  - "DOMAIN-SUFFIX,deepwiki.com,PROXY"
+  - "DOMAIN-SUFFIX,windsurf.com,PROXY"
+  - "DOMAIN-SUFFIX,codeium.com,PROXY"
+  - "DOMAIN-SUFFIX,codeiumdata.com,PROXY"
+
   # GitHub 生态（含 Release 存储桶、Raw、Assets、Web）
   - "DOMAIN-KEYWORD,github,PROXY"
   - "DOMAIN-SUFFIX,ghcr.io,PROXY"
