@@ -1,7 +1,7 @@
 /**
  * @name DBinK 综合配置覆写 (桌面端)
  * @description
- *   1. 剔除所有包含香港/HK关键词的节点及策略组引用；
+ *   1. 剔除所有包含香港/HK关键词的节点及策略组引用，并剔除自动选择组中的 DIRECT；
  *   2. 前置自定义拦截 (REJECT)、直连 (DIRECT) 与强制代理 (PROXY) 规则。
  * @target Mihomo Party / Clash Verge Rev (Desktop)
  * @source https://github.com/DBinK/dbk-override
@@ -40,15 +40,21 @@ function main(config) {
     );
   }
 
-  // 同步清理策略组中的香港节点，兜底 DIRECT
+  // 同步清理策略组：剔除香港节点；自动选择组（url-test/fallback/load-balance）
+  // 额外剔除 DIRECT，防止测速选优选中直连假节点导致绕过代理
+  const AUTO_GROUP_TYPES = new Set(["url-test", "fallback", "load-balance"]);
+  const isDirect = (name) => String(name).toUpperCase() === "DIRECT";
+
   if (Array.isArray(config["proxy-groups"])) {
     config["proxy-groups"].forEach((group) => {
       if (Array.isArray(group.proxies)) {
+        const isAuto = group && AUTO_GROUP_TYPES.has(group.type);
         group.proxies = group.proxies.filter(
-          (name) => !hkPattern.test(name)
+          (name) => !hkPattern.test(name) && !(isAuto && isDirect(name))
         );
         if (group.proxies.length === 0) {
-          group.proxies.push("DIRECT");
+          // 兜底：组被清空时用官方 empty-fallback 回退直连（不参与测速选优）
+          group["empty-fallback"] = "DIRECT";
         }
       }
     });

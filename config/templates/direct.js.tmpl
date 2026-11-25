@@ -1,6 +1,6 @@
 /**
  * @name 自定义直连域名
- * @description 将指定常用网站及服务置顶直连
+ * @description 将指定常用网站及服务置顶直连，并剔除自动选择组中的 DIRECT（防止测速选优选中直连假节点）
  * @target Mihomo Party / Clash Verge Rev
  * @source https://github.com/DBinK/dbk-override
  * @build {{BUILD_TAG}}
@@ -18,6 +18,23 @@ function main(config) {
   }
 
   config.rules = [...directRules, ...config.rules];
+
+  // 剔除自动选择组中的 DIRECT：url-test/fallback/load-balance 按延迟选优，
+  // DIRECT 不走代理延迟天然占优，容易被误选为“直连假节点”导致绕过代理
+  const AUTO_GROUP_TYPES = new Set(["url-test", "fallback", "load-balance"]);
+  const isDirect = (name) => String(name).toUpperCase() === "DIRECT";
+
+  if (Array.isArray(config["proxy-groups"])) {
+    config["proxy-groups"].forEach((group) => {
+      if (!group || !AUTO_GROUP_TYPES.has(group.type)) return;
+      if (!Array.isArray(group.proxies)) return;
+      group.proxies = group.proxies.filter((name) => !isDirect(name));
+      // 兜底：组被清空时用官方 empty-fallback 回退直连（不参与测速选优），保证配置可加载
+      if (group.proxies.length === 0) {
+        group["empty-fallback"] = "DIRECT";
+      }
+    });
+  }
 
   return config;
 }
